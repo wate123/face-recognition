@@ -8,6 +8,7 @@ from keras.layers.normalization import BatchNormalization
 from keras.layers.pooling import MaxPooling2D, AveragePooling2D
 from keras.models import Model
 from keras import backend as K
+from keras.layers import Input, Layer
 
 import utils
 from utils import LRN2D
@@ -218,3 +219,19 @@ def create_model():
     norm_layer = Lambda(lambda  x: K.l2_normalize(x, axis=1), name='norm_layer')(dense_layer)
 
     return Model(inputs=[myInput], outputs=norm_layer)
+
+class TripletLossLayer(Layer):
+    def __init__(self, alpha, **kwargs):
+        self.alpha = alpha
+        super(TripletLossLayer, self).__init__(**kwargs)
+    
+    def triplet_loss(self, inputs):
+        a, p, n = inputs
+        p_dist = K.sum(K.square(a-p), axis=-1)
+        n_dist = K.sum(K.square(a-n), axis=-1)
+        return K.sum(K.maximum(p_dist - n_dist + self.alpha, 0), axis=0)
+    
+    def call(self, inputs):
+        loss = self.triplet_loss(inputs)
+        self.add_loss(loss)
+        return loss

@@ -5,6 +5,8 @@
 import tensorflow as tf
 import numpy as np
 import os
+import cv2
+
 
 from numpy import genfromtxt
 from keras.layers import Conv2D, ZeroPadding2D, Activation
@@ -156,3 +158,35 @@ def load_weights():
       weights_dict[name] = [dense_w, dense_b]
 
   return weights_dict
+
+class IdentityMetadata():
+    def __init__(self, base, name, file):
+        # dataset base directory
+        self.base = base
+        # identity name
+        self.name = name
+        # image file name
+        self.file = file
+
+    def __repr__(self):
+        return self.image_path()
+
+    def image_path(self):
+        return os.path.join(self.base, self.name, self.file) 
+    
+def load_metadata(path):
+    metadata = []
+    for i in os.listdir(path):
+        for f in os.listdir(os.path.join(path, i)):
+            # Check file extension. Allow only jpg/jpeg' files.
+            print(f)
+            ext = os.path.splitext(f)[1]
+            if ext == '.jpg' or ext == '.jpeg':
+                metadata.append(IdentityMetadata(path, i, f))
+    return np.array(metadata)
+
+def load_image(path):
+    img = cv2.imread(path, 1)
+    # OpenCV loads images with color channels
+    # in BGR order. So we need to reverse them
+    return img[...,::-1]
