@@ -44,28 +44,28 @@ metadata = load_metadata('images')
 # Initialize the OpenFace face alignment utility
 alignment = AlignDlib('models/landmarks.dat')
 
-# # Load an image of Jacques Chirac
-# jc_orig = load_image(metadata[30].image_path())
-#
-# # Detect face and return bounding box
-# bb = alignment.getLargestFaceBoundingBox(jc_orig)
-#
-# # Transform image using specified face landmark indices and crop image to 96x96
-# jc_aligned = alignment.align(96, jc_orig, bb, landmarkIndices=AlignDlib.OUTER_EYES_AND_NOSE)
-#
-# # Show original image
-# plt.subplot(131)
-# plt.imshow(jc_orig)
-#
-# # Show original image with bounding box
-# plt.subplot(132)
-# plt.imshow(jc_orig)
-# plt.gca().add_patch(patches.Rectangle((bb.left(), bb.top()), bb.width(), bb.height(), fill=False, color='red'))
-#
-# # Show aligned image
-# plt.subplot(133)
-# plt.imshow(jc_aligned)
-# plt.show()
+# Load an image of Jacques Chirac
+jc_orig = load_image(metadata[30].image_path())
+
+# Detect face and return bounding box
+bb = alignment.getLargestFaceBoundingBox(jc_orig)
+
+# Transform image using specified face landmark indices and crop image to 96x96
+jc_aligned = alignment.align(96, jc_orig, bb, landmarkIndices=AlignDlib.OUTER_EYES_AND_NOSE)
+
+# Show original image
+plt.subplot(131)
+plt.imshow(jc_orig)
+
+# Show original image with bounding box
+plt.subplot(132)
+plt.imshow(jc_orig)
+plt.gca().add_patch(patches.Rectangle((bb.left(), bb.top()), bb.width(), bb.height(), fill=False, color='red'))
+
+# Show aligned image
+plt.subplot(133)
+plt.imshow(jc_aligned)
+plt.show()
 
 
 def align_image(img):
@@ -158,12 +158,11 @@ plt.show()
 
 
 
-
 targets = np.array([m.name for m in metadata])
 
 encoder = LabelEncoder()
 encoder.fit(targets)
-
+print(encoder)
 # Numerical encoding of identities
 y = encoder.transform(targets)
 
