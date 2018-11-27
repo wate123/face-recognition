@@ -34,4 +34,4 @@ def train_model():
     nn4_small2_train.compile(loss=None, optimizer='adam')
     nn4_small2_train.fit_generator(generator, epochs=10, steps_per_epoch=100)
 
-    return train_model()
+    return nn4_small2_train

@@ -6,7 +6,8 @@ import tensorflow as tf
 import numpy as np
 import os
 import cv2
-
+import bz2
+from urllib.request import urlopen
 
 from numpy import genfromtxt
 from keras.layers import Conv2D, ZeroPadding2D, Activation
@@ -179,7 +180,6 @@ def load_metadata(path):
     for i in os.listdir(path):
         for f in os.listdir(os.path.join(path, i)):
             # Check file extension. Allow only jpg/jpeg' files.
-            print(f)
             ext = os.path.splitext(f)[1]
             if ext == '.jpg' or ext == '.jpeg':
                 metadata.append(IdentityMetadata(path, i, f))
@@ -190,3 +190,14 @@ def load_image(path):
     # OpenCV loads images with color channels
     # in BGR order. So we need to reverse them
     return img[...,::-1]
+
+
+def download_landmarks(dst_file):
+  url = 'http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2'
+  decompressor = bz2.BZ2Decompressor()
+
+  with urlopen(url) as src, open(dst_file, 'wb') as dst:
+    data = src.read(1024)
+    while len(data) > 0:
+      dst.write(decompressor.decompress(data))
+      data = src.read(1024)

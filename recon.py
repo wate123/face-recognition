@@ -1,7 +1,5 @@
-import bz2
 import os
 
-from urllib.request import urlopen
 from keras import backend as K
 from keras.models import Model
 from keras.layers import Input, Layer
@@ -16,7 +14,7 @@ from train import train_model
 
 from data import triplet_generator
 from sklearn.metrics import f1_score, accuracy_score
-from utils import load_metadata, load_image
+from utils import load_metadata, load_image, download_landmarks
 
 from sklearn.preprocessing import LabelEncoder
 from sklearn.neighbors import KNeighborsClassifier
@@ -25,30 +23,22 @@ import warnings
 
 
 
-# def download_landmarks(dst_file):
-#     url = 'http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2'
-#     decompressor = bz2.BZ2Decompressor()
-    
-#     with urlopen(url) as src, open(dst_file, 'wb') as dst:
-#         data = src.read(1024)
-#         while len(data) > 0:
-#             dst.write(decompressor.decompress(data))
-#             data = src.read(1024)
 
-# dst_dir = 'models'
-# dst_file = os.path.join(dst_dir, 'landmarks.dat')
+dst_dir = 'models'
+dst_file = os.path.join(dst_dir, 'landmarks.dat')
 
-# if not os.path.exists(dst_file):
-#     os.makedirs(dst_dir)
-#     download_landmarks(dst_file)
+if not os.path.exists(dst_file):
+    os.makedirs(dst_dir)
+    download_landmarks(dst_file)
 
 nn4_small2_train = create_model()
-try:
-    f =  open('weights/nn4.small2.myTrain.h5', 'r')
-    nn4_small2_train.load_weights(f)
-except FileNotFoundError:
-    nn4_small2_train = train_model()
-
+nn4_small2_train.load_weights('weights/nn4.small2.v1.h5')
+# try:
+#     open('weights/nn4.small2.myTrain.h5', 'r')
+#     nn4_small2_train.load_weights('weights/nn4.small2.myTrain.h5')
+# except FileNotFoundError:
+#
+# nn4_small2_train = train_model()
 
 
 metadata = load_metadata('images')
