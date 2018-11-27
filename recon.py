@@ -22,8 +22,6 @@ from sklearn.svm import LinearSVC
 import warnings
 
 
-
-
 dst_dir = 'models'
 dst_file = os.path.join(dst_dir, 'landmarks.dat')
 
@@ -46,28 +44,28 @@ metadata = load_metadata('images')
 # Initialize the OpenFace face alignment utility
 alignment = AlignDlib('models/landmarks.dat')
 
-# Load an image of Jacques Chirac
-jc_orig = load_image(metadata[0].image_path())
-
-# Detect face and return bounding box
-bb = alignment.getLargestFaceBoundingBox(jc_orig)
-
-# Transform image using specified face landmark indices and crop image to 96x96
-jc_aligned = alignment.align(96, jc_orig, bb, landmarkIndices=AlignDlib.OUTER_EYES_AND_NOSE)
-
-# Show original image
-plt.subplot(131)
-plt.imshow(jc_orig)
-
-# Show original image with bounding box
-plt.subplot(132)
-plt.imshow(jc_orig)
-plt.gca().add_patch(patches.Rectangle((bb.left(), bb.top()), bb.width(), bb.height(), fill=False, color='red'))
-
-# Show aligned image
-plt.subplot(133)
-plt.imshow(jc_aligned)
-plt.show()
+# # Load an image of Jacques Chirac
+# jc_orig = load_image(metadata[30].image_path())
+#
+# # Detect face and return bounding box
+# bb = alignment.getLargestFaceBoundingBox(jc_orig)
+#
+# # Transform image using specified face landmark indices and crop image to 96x96
+# jc_aligned = alignment.align(96, jc_orig, bb, landmarkIndices=AlignDlib.OUTER_EYES_AND_NOSE)
+#
+# # Show original image
+# plt.subplot(131)
+# plt.imshow(jc_orig)
+#
+# # Show original image with bounding box
+# plt.subplot(132)
+# plt.imshow(jc_orig)
+# plt.gca().add_patch(patches.Rectangle((bb.left(), bb.top()), bb.width(), bb.height(), fill=False, color='red'))
+#
+# # Show aligned image
+# plt.subplot(133)
+# plt.imshow(jc_aligned)
+# plt.show()
 
 
 def align_image(img):
@@ -88,20 +86,6 @@ for i, m in enumerate(metadata):
 
 def distance(emb1, emb2):
     return np.sum(np.square(emb1 - emb2))
-
-
-# def show_pair(idx1, idx2):
-#     plt.figure(figsize=(8,3))
-#     plt.suptitle(f'Distance = {distance(embedded[idx1], embedded[idx2]):.2f}')
-#     plt.subplot(121)
-#     plt.imshow(load_image(metadata[idx1].image_path()))
-#     plt.subplot(122)
-#     plt.imshow(load_image(metadata[idx2].image_path()))
-#
-#
-# show_pair(2, 3)
-# show_pair(2, 12)
-# plt.show()
 
 
 distances = [] # squared L2 distance between pairs
@@ -208,14 +192,22 @@ print(f'KNN accuracy = {acc_knn}, SVM accuracy = {acc_svc}')
 # Suppress LabelEncoder warning
 warnings.filterwarnings('ignore')
 
-example_idx = 10
+example_idx = 40
 
+# example_image = load_image('test/220px-Arnold_Schwarzenegger_September_2017.jpg')
 example_image = load_image(metadata[test_idx][example_idx].image_path())
+print(metadata[test_idx][example_idx].image_path())
+bb = alignment.getLargestFaceBoundingBox(example_image)
+
 example_prediction = svc.predict([embedded[test_idx][example_idx]])
 example_identity = encoder.inverse_transform(example_prediction)[0]
 
+knn_prediction = knn.predict([embedded[test_idx][example_idx]])
+knn_identity = encoder.inverse_transform(knn_prediction)[0]
+
 plt.imshow(example_image)
-plt.title(f'Recognized as {example_identity}')
+plt.title(f'Recognized as {example_identity} using SVM')
+plt.gca().add_patch(patches.Rectangle((bb.left(), bb.top()), bb.width(), bb.height(), fill=False, color='red'))
 plt.show()
 
 from sklearn.manifold import TSNE
