@@ -44,8 +44,8 @@ metadata = load_metadata('images')
 # Initialize the OpenFace face alignment utility
 alignment = AlignDlib('models/landmarks.dat')
 
-# Load an image of Jacques Chirac
-jc_orig = load_image(metadata[30].image_path())
+# Load an image of Schwarzenegger
+jc_orig = load_image(metadata[92].image_path())
 
 # Detect face and return bounding box
 bb = alignment.getLargestFaceBoundingBox(jc_orig)
@@ -74,7 +74,6 @@ def align_image(img):
 
 
 embedded = np.zeros((metadata.shape[0], 128))
-
 for i, m in enumerate(metadata):
     img = load_image(m.image_path())
     img = align_image(img)
@@ -84,9 +83,22 @@ for i, m in enumerate(metadata):
     embedded[i] = nn4_small2_train.predict(np.expand_dims(img, axis=0))[0]
 
 
+# Verify
 def distance(emb1, emb2):
     return np.sum(np.square(emb1 - emb2))
 
+def show_pair(idx1, idx2):
+    plt.figure(figsize=(8,3))
+    plt.suptitle(f'Distance = {distance(embedded[idx1], embedded[idx2]):.2f}')
+    plt.subplot(121)
+    plt.imshow(load_image(metadata[idx1].image_path()))
+    plt.subplot(122)
+    plt.imshow(load_image(metadata[idx2].image_path()));
+
+
+show_pair(94, 95)
+show_pair(94, 89)
+plt.show()
 
 distances = [] # squared L2 distance between pairs
 identical = [] # 1 if same identity, 0 otherwise
@@ -162,7 +174,6 @@ targets = np.array([m.name for m in metadata])
 
 encoder = LabelEncoder()
 encoder.fit(targets)
-print(encoder)
 # Numerical encoding of identities
 y = encoder.transform(targets)
 
@@ -191,18 +202,14 @@ print(f'KNN accuracy = {acc_knn}, SVM accuracy = {acc_svc}')
 # Suppress LabelEncoder warning
 warnings.filterwarnings('ignore')
 
-example_idx = 40
+example_idx = 23
 
 # example_image = load_image('test/220px-Arnold_Schwarzenegger_September_2017.jpg')
 example_image = load_image(metadata[test_idx][example_idx].image_path())
-print(metadata[test_idx][example_idx].image_path())
 bb = alignment.getLargestFaceBoundingBox(example_image)
-
 example_prediction = svc.predict([embedded[test_idx][example_idx]])
 example_identity = encoder.inverse_transform(example_prediction)[0]
-
-knn_prediction = knn.predict([embedded[test_idx][example_idx]])
-knn_identity = encoder.inverse_transform(knn_prediction)[0]
+print(example_identity)
 
 plt.imshow(example_image)
 plt.title(f'Recognized as {example_identity} using SVM')
